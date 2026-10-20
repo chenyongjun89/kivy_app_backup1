@@ -1,0 +1,213 @@
+#:import RecordRow __main__.RecordRow
+#:import dp kivy.metrics.dp
+
+<RecordRow>:
+    size_hint_y: None
+    height: dp(65)
+    canvas.before:
+        Color:
+            rgba: 1, 1, 1, 1
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [12]
+    
+    BoxLayout:
+        padding: [15, 10]
+        Label:
+            text: root.text
+            color: 0.2, 0.2, 0.2, 1
+            font_size: '14sp'
+            halign: 'left'
+            valign: 'middle'
+            text_size: self.width, None
+        Label:
+            text: root.amount_str
+            color: root.amount_color
+            font_size: '18sp'
+            bold: True
+            size_hint_x: 0.3
+            halign: 'right'
+            valign: 'middle'
+            text_size: self.width, None
+        Button:
+            text: "删"
+            size_hint_x: 0.12
+            background_normal: ''
+            background_color: 1, 0.9, 0.9, 1
+            color: 0.9, 0.3, 0.3, 1
+            on_release: app.root.delete_record(root.index)
+
+<ExpenseTracker>:
+    orientation: 'vertical'
+    padding: dp(15)
+    spacing: dp(10)
+    canvas.before:
+        Color:
+            rgba: 0.95, 0.96, 0.98, 1 
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+    # ============ 顶部统计卡片 ============
+    BoxLayout:
+        size_hint_y: None
+        height: dp(60)
+        canvas.before:
+            Color:
+                rgba: 0.2, 0.5, 1, 1 
+            RoundedRectangle:
+                pos: self.pos
+                size: self.size
+                radius: [15]
+        Label:
+            text: f"收入:\n{root.total_income}"
+            color: 1, 1, 1, 1
+            font_size: '16sp'
+            bold: True
+        Label:
+            text: f"支出:\n{root.total_expense}"
+            color: 1, 1, 1, 1
+            font_size: '16sp'
+            bold: True
+
+    # ============ 过滤区 (月份 + 分类) ============
+    BoxLayout:
+        size_hint_y: None
+        height: dp(40)
+        spacing: dp(10)
+        
+        # 月份下拉框
+        Spinner:
+            id: month_spinner
+            text: '全部'
+            values: ('全部',) 
+            background_normal: ''
+            background_color: 0.9, 0.9, 0.95, 1
+            color: 0, 0, 0, 1
+            font_size: '16sp'
+            on_text: root.refresh_list() 
+            
+        # 分类下拉框
+        Spinner:
+            id: category_filter_spinner
+            text: '全部分类'
+            # 把所有可能出现的分类都写死在这里
+            values: ('全部分类', '餐饮', '购物', '交通', '话费', '医疗', '工资', '奖金', '红包', '理财收益', '退款', '其他')
+            background_normal: ''
+            background_color: 0.9, 0.9, 0.95, 1
+            color: 0, 0, 0, 1
+            font_size: '16sp'
+            on_text: root.refresh_list()
+
+    # ============ 金额输入区 ============
+    BoxLayout:
+        size_hint_y: None
+        height: dp(50)
+        spacing: dp(10)
+        
+        BoxLayout:
+            canvas.before:
+                Color:
+                    rgba: 1, 1, 1, 1
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [10]
+            TextInput:
+                id: amount_input
+                hint_text: '输入金额'
+                multiline: False
+                font_size: '18sp'
+                background_color: 0, 0, 0, 0
+                foreground_color: 0, 0, 0, 1
+                hint_text_color: 0.5, 0.5, 0.5, 1
+                cursor_color: 0.2, 0.5, 1, 1
+                padding_x: dp(15)
+                
+        ToggleButton:
+            id: type_switch
+            text: '支出' if self.state == 'normal' else '收入'
+            size_hint_x: 0.3
+            background_normal: ''
+            background_color: (0.9, 0.3, 0.3, 1) if self.state == 'normal' else (0.2, 0.7, 0.2, 1)
+            color: 1, 1, 1, 1
+            font_size: '18sp'
+            on_release: root.on_type_toggle()
+
+    # ============ 备注输入区 ============
+    BoxLayout:
+        size_hint_y: None
+        height: dp(50)
+        canvas.before:
+            Color:
+                rgba: 1, 1, 1, 1
+            RoundedRectangle:
+                pos: self.pos
+                size: self.size
+                radius: [10]
+        TextInput:
+            id: note_input
+            hint_text: '备注 (选填)'
+            multiline: False
+            font_size: '16sp'
+            background_color: 0, 0, 0, 0
+            foreground_color: 0, 0, 0, 1
+            hint_text_color: 0.5, 0.5, 0.5, 1
+            padding_x: dp(15)
+
+    # ============ 分类和平台选择 ============
+    BoxLayout:
+        size_hint_y: None
+        height: dp(45)
+        spacing: dp(10)
+        Spinner:
+            id: category_spinner
+            text: '选择分类'
+            values: ('餐饮', '购物', '交通', '医疗', '其他') 
+            background_normal: ''
+            background_color: 1, 1, 1, 1
+            color: 0, 0, 0, 1
+        Spinner:
+            id: platform_spinner
+            text: '选择平台'
+            values: ('微信', '支付宝', '淘宝', '抖音', '快手', '农行', '其他')
+            background_normal: ''
+            background_color: 1, 1, 1, 1
+            color: 0, 0, 0, 1
+
+    # ============ 保存按钮 ============
+    Button:
+        text: '保存记录'
+        size_hint_y: None
+        height: dp(50)
+        background_normal: ''
+        background_color: 0.2, 0.6, 1, 1
+        font_size: '18sp'
+        bold: True
+        on_release: root.save_record()
+
+    # ============ 记录列表 ============
+    RecycleView:
+        id: rv
+        viewclass: 'RecordRow'
+        scroll_type: ['bars', 'content']
+        bar_width: dp(5)
+        
+        RecycleBoxLayout:
+            default_size: None, dp(65)
+            default_size_hint: 1, None
+            size_hint_y: None
+            height: self.minimum_height
+            orientation: 'vertical'
+            spacing: dp(10)
+
+    # ============ 导出按钮 ============
+    Button:
+        text: '导出为 Excel (CSV)'
+        size_hint_y: None
+        height: dp(45)
+        background_normal: ''
+        background_color: 0.9, 0.7, 0.2, 1
+        font_size: '16sp'
+        on_release: root.export_data()
