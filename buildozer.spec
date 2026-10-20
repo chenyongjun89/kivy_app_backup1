@@ -17,7 +17,7 @@ source.main = main.py
 version = 1.0
 
 # 依赖库（必须包含 jnius，且不要写版本号）
-requirements = python3,kivy,jnius,android
+requirements = python3,kivy,pyjnius,android
 
 # 允许屏幕竖屏
 orientation = portrait
