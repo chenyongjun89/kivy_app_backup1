@@ -3,7 +3,7 @@ on: [push, workflow_dispatch]
 
 jobs:
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -16,15 +16,17 @@ jobs:
     - name: Install system dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev
+        # ★ 在末尾加上了 aidl
+        sudo apt-get install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev aidl
 
-    - name: Install Buildozer and Jnius
+    - name: Install Buildozer and Cython
       run: |
         pip install buildozer cython
         pip install "pyjnius>=1.4.0"
 
     - name: Build APK
-      run: buildozer -v android debug
+      # ★ 这里加了 echo y | 来自动同意协议
+      run: echo y | buildozer -v android debug
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
