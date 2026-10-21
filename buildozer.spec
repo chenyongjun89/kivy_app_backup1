@@ -32,7 +32,7 @@ android.permissions = WRITE_EXTERNAL_STORAGE, READ_EXTERNAL_STORAGE
 # 编译目标
 android.api = 33
 android.ndk = 25b
-android.archs = arm64-v8a, armeabi-v7a
+android.archs = arm64-v8a
 
 # ★ 核心修复：自动接受安卓 SDK 许可协议（加在最下面）
 android.accept_sdk_license = True
