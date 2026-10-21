@@ -17,7 +17,6 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev cmake libffi-dev libssl-dev aidl
-        
         sudo apt-get install -y --no-install-recommends libtinfo5 || true
         if ! dpkg -l | grep -q "libtinfo5"; then
           wget http://security.ubuntu.com/ubuntu/pool/universe/n/ncurses/libtinfo5_6.3-2ubuntu0.1_amd64.deb
@@ -29,20 +28,18 @@ jobs:
         pip install buildozer cython
         pip install "pyjnius>=1.4.0"
 
-    # ★ 核心修复：处理 swap 文件被占用的问题，并加入备用创建方案
     - name: Create Swap Space
       run: |
-        # 关闭并删除正在占用的 swap
         sudo swapoff -a || true
         sudo rm -f /swapfile
-        # 先尝试 fallocate，如果失败则用 dd
         sudo fallocate -l 4G /swapfile || sudo dd if=/dev/zero of=/swapfile bs=1M count=4096
         sudo chmod 600 /swapfile
         sudo mkswap /swapfile
         sudo swapon /swapfile
 
     - name: Build APK
-      run: yes | buildozer android debug
+      # 加上 --no-bytecode 参数，大幅降低内存和时间消耗
+      run: yes | buildozer --no-bytecode android debug
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
