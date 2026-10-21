@@ -3,13 +3,12 @@ on: [push, workflow_dispatch]
 
 jobs:
   build:
-    # ★ 核心绝杀：降级到 20.04，彻底避开最新系统的兼容性大坑
-    runs-on: ubuntu-20.04
+    # 换回 22.04（20.04 已经被 GitHub 彻底淘汰了）
+    runs-on: ubuntu-22.04
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    # 清理旧的编译残留
     - name: Clean Buildozer Cache
       run: |
         rm -rf .buildozer
@@ -17,7 +16,8 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: '3.9'
+        # ★ 强制使用 3.10，避开 3.14 的报错
+        python-version: '3.10'
 
     - name: Install system dependencies
       run: |
