@@ -1,42 +1,23 @@
 [app]
-
-# App 显示的名称
 title = 我的记账本
-
-# 包名，必须全是小写字母
 package.name = mybookkeeper
 package.domain = org.test
-
-# 源代码所在的目录
 source.dir = .
-
-# 允许打包的文件后缀
 source.include_exts = py,png,jpg,kv,atlas,ttc,json
-
-# 主入口文件
 source.main = main.py
-
-# 版本号
 version = 1.0
 
-# ★ 绝杀修复：强制使用稳定的 master 分支（避开 develop 分支强塞的 Python 3.14）
-p4a.branch = master
+# 核心：绝对不写版本号，让系统自己匹配
+requirements = python3,kivy,pyjnius
 
-# ★ 核心修复：同时且明确地指定宿主机和目标机的 Python 版本，防止版本打架
-requirements = hostpython3==3.10.11,python3==3.10.11,kivy,pyjnius
-
-# 竖屏
 orientation = portrait
 fullscreen = 0
-
-# 安卓权限
 android.permissions = WRITE_EXTERNAL_STORAGE, READ_EXTERNAL_STORAGE
-
-# 编译目标（保持单架构，防止内存溢出）
 android.api = 30
 android.minapi = 21
 android.ndk = 25b
 android.archs = arm64-v8a
-
-# 自动接受 SDK 协议
 android.accept_sdk_license = True
+
+# 核心：强制使用稳定分支，拒绝 Python 3.14
+p4a.branch = master
