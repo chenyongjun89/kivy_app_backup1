@@ -29,16 +29,19 @@ jobs:
         pip install buildozer cython
         pip install "pyjnius>=1.4.0"
 
-    # ★ 核心优化：增加 Swap 虚拟内存，防止编译时内存不足被杀
+    # ★ 核心修复：处理 swap 文件被占用的问题，并加入备用创建方案
     - name: Create Swap Space
       run: |
-        sudo fallocate -l 4G /swapfile
+        # 关闭并删除正在占用的 swap
+        sudo swapoff -a || true
+        sudo rm -f /swapfile
+        # 先尝试 fallocate，如果失败则用 dd
+        sudo fallocate -l 4G /swapfile || sudo dd if=/dev/zero of=/swapfile bs=1M count=4096
         sudo chmod 600 /swapfile
         sudo mkswap /swapfile
         sudo swapon /swapfile
 
     - name: Build APK
-      # 去掉了 -v 参数，只输出关键日志，防止被网页截断；使用 yes 同意协议
       run: yes | buildozer android debug
 
     - name: Upload APK
