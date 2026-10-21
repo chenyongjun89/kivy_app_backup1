@@ -8,6 +8,11 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
+    # ★ 插入这段：清理可能残留的编译缓存
+    - name: Clean Buildozer Cache
+      run: |
+        rm -rf .buildozer
+
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
