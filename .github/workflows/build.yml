@@ -18,13 +18,12 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev cmake libffi-dev libssl-dev aidl
         
-        # 方案一：优先尝试通过 apt 强制从官方源安装
-        # 使用 --no-install-recommends 减少不必要的依赖，提升安装成功率
+        # 尝试从系统源安装 libtinfo5（失败也不中断）
         sudo apt-get install -y --no-install-recommends libtinfo5 || true
         
-        # 方案二：如果 apt 安装失败，则从 Ubuntu 安全源下载 .deb 包进行兜底安装
+        # 如果系统源安装失败，则手动下载备用源
         if ! dpkg -l | grep -q "libtinfo5"; then
-          echo "Fallback: Downloading libtinfo5 from security.ubuntu.com..."
+          echo "Fallback: Downloading libtinfo5..."
           wget http://security.ubuntu.com/ubuntu/pool/universe/n/ncurses/libtinfo5_6.3-2ubuntu0.1_amd64.deb
           sudo dpkg -i libtinfo5_6.3-2ubuntu0.1_amd64.deb
         fi
@@ -35,7 +34,8 @@ jobs:
         pip install "pyjnius>=1.4.0"
 
     - name: Build APK
-      run: echo y | buildozer -v android debug
+      # 移除 -v 参数，只输出关键日志，避免触发体积截断
+      run: echo y | buildozer android debug
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
