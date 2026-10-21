@@ -20,7 +20,7 @@ source.main = main.py
 version = 1.0
 
 # ★ 核心修复：锁定 Kivy 版本和 pyjnius，防止云端拉取最新版本导致报错
-requirements = python3==3.10,kivy==2.2.1,pyjnius==1.5.0
+requirements = python3,kivy,pyjnius
 
 # 竖屏
 orientation = portrait
