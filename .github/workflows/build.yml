@@ -3,22 +3,16 @@ on: [push, workflow_dispatch]
 
 jobs:
   build:
-    # 换回 22.04（20.04 已经被 GitHub 彻底淘汰了）
     runs-on: ubuntu-22.04
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Clean Buildozer Cache
-      run: |
-        rm -rf .buildozer
+    # 清理环境
+    - name: Clean
+      run: rm -rf .buildozer
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        # ★ 强制使用 3.10，避开 3.14 的报错
-        python-version: '3.10'
-
+    # 1. 直接使用系统自带的 Python 3.10，不折腾版本
     - name: Install system dependencies
       run: |
         sudo apt-get update
@@ -29,6 +23,7 @@ jobs:
         pip install buildozer cython
         pip install "pyjnius>=1.4.0"
 
+    # 2. 挂载 4GB 虚拟内存，防止编译 C 库时内存溢出被杀
     - name: Create Swap Space
       run: |
         sudo swapoff -a || true
@@ -38,9 +33,11 @@ jobs:
         sudo mkswap /swapfile
         sudo swapon /swapfile
 
+    # 3. 编译
     - name: Build APK
       run: yes | buildozer android debug
 
+    # 4. 保存结果
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
