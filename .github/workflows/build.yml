@@ -3,7 +3,6 @@ on: [push, workflow_dispatch]
 
 jobs:
   build:
-    # ★ 核心修改 1：锁定运行环境为 Ubuntu 22.04
     runs-on: ubuntu-22.04
     steps:
     - name: Checkout code
@@ -17,12 +16,11 @@ jobs:
     - name: Install system dependencies
       run: |
         sudo apt-get update
-        # 先从包管理里移除 libtinfo5，防止报错
         sudo apt-get install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev cmake libffi-dev libssl-dev aidl
         
-        # ★ 核心修改 2：手动下载并安装 libtinfo5
-        wget http://security.ubuntu.com/ubuntu/pool/universe/n/ncurses/libtinfo5_6.3-2ubuntu0.2_amd64.deb
-        sudo dpkg -i libtinfo5_6.3-2ubuntu0.2_amd64.deb
+        # ★ 核心修复：从 old-releases 仓库下载有效的 libtinfo5
+        wget http://old-releases.ubuntu.com/ubuntu/pool/universe/n/ncurses/libtinfo5_6.3-2_amd64.deb
+        sudo dpkg -i libtinfo5_6.3-2_amd64.deb
 
     - name: Install Buildozer and Cython
       run: |
@@ -30,7 +28,6 @@ jobs:
         pip install "pyjnius>=1.4.0"
 
     - name: Build APK
-      # 自动同意 SDK 协议
       run: echo y | buildozer -v android debug
 
     - name: Upload APK
