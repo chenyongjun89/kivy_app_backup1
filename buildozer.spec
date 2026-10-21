@@ -19,8 +19,11 @@ source.main = main.py
 # 版本号
 version = 1.0
 
-# ★ 核心修复：锁定 Kivy 版本和 pyjnius，防止云端拉取最新版本导致报错
-requirements = python3,kivy,pyjnius
+# ★ 绝杀修复：强制使用稳定的 master 分支（避开 develop 分支强塞的 Python 3.14）
+p4a.branch = master
+
+# ★ 核心修复：同时且明确地指定宿主机和目标机的 Python 版本，防止版本打架
+requirements = hostpython3==3.10.11,python3==3.10.11,kivy,pyjnius
 
 # 竖屏
 orientation = portrait
