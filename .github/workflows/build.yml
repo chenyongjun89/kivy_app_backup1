@@ -3,7 +3,6 @@ on: [push, workflow_dispatch]
 
 jobs:
   build:
-    # 锁定使用 Ubuntu 22.04 环境，确保稳定性
     runs-on: ubuntu-22.04
     steps:
     - name: Checkout code
@@ -17,13 +16,10 @@ jobs:
     - name: Install system dependencies
       run: |
         sudo apt-get update
-        # 安装基础依赖和 aidl 工具
         sudo apt-get install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev cmake libffi-dev libssl-dev aidl
         
-        # 从系统源尝试安装 libtinfo5，如果失败则手动下载安装包
         sudo apt-get install -y --no-install-recommends libtinfo5 || true
         if ! dpkg -l | grep -q "libtinfo5"; then
-          echo "Fallback: Downloading libtinfo5..."
           wget http://security.ubuntu.com/ubuntu/pool/universe/n/ncurses/libtinfo5_6.3-2ubuntu0.1_amd64.deb
           sudo dpkg -i libtinfo5_6.3-2ubuntu0.1_amd64.deb
         fi
@@ -33,9 +29,17 @@ jobs:
         pip install buildozer cython
         pip install "pyjnius>=1.4.0"
 
+    # ★ 核心优化：增加 Swap 虚拟内存，防止编译时内存不足被杀
+    - name: Create Swap Space
+      run: |
+        sudo fallocate -l 4G /swapfile
+        sudo chmod 600 /swapfile
+        sudo mkswap /swapfile
+        sudo swapon /swapfile
+
     - name: Build APK
-      # 在命令前加上 "yes |" 来自动同意所有 SDK 许可协议，避免交互式阻塞
-      run: yes | buildozer -v android debug
+      # 去掉了 -v 参数，只输出关键日志，防止被网页截断；使用 yes 同意协议
+      run: yes | buildozer android debug
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
