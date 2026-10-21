@@ -3,7 +3,6 @@ on: [push, workflow_dispatch]
 
 jobs:
   build:
-    # 将运行环境固定为 ubuntu-22.04，这是一个长期支持版本，兼容性更好
     runs-on: ubuntu-22.04
     steps:
     - name: Checkout code
@@ -19,15 +18,16 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev cmake libffi-dev libssl-dev aidl
         
-        # ★ 核心修复：从 Kernel 镜像站下载有效的 libtinfo5 安装包
-        # 该链接来自一个官方示例，稳定性较高
-        wget https://mirrors.edge.kernel.org/ubuntu/pool/universe/n/ncurses/libtinfo5_6.3-2ubuntu0.1_amd64.deb
+        # 方案一：优先尝试通过 apt 强制从官方源安装
+        # 使用 --no-install-recommends 减少不必要的依赖，提升安装成功率
+        sudo apt-get install -y --no-install-recommends libtinfo5 || true
         
-        # （可选）校验文件完整性，确保下载无误
-        echo "f04c382f877c9eab631818eadbfaa0c5 libtinfo5_6.3-2ubuntu0.1_amd64.deb" | md5sum -c --status
-        
-        # 安装下载的包
-        sudo dpkg -i libtinfo5_6.3-2ubuntu0.1_amd64.deb
+        # 方案二：如果 apt 安装失败，则从 Ubuntu 安全源下载 .deb 包进行兜底安装
+        if ! dpkg -l | grep -q "libtinfo5"; then
+          echo "Fallback: Downloading libtinfo5 from security.ubuntu.com..."
+          wget http://security.ubuntu.com/ubuntu/pool/universe/n/ncurses/libtinfo5_6.3-2ubuntu0.1_amd64.deb
+          sudo dpkg -i libtinfo5_6.3-2ubuntu0.1_amd64.deb
+        fi
 
     - name: Install Buildozer and Cython
       run: |
