@@ -8,7 +8,7 @@ source.main = main.py
 version = 1.0
 
 # 核心：绝对不写版本号，让系统自己匹配
-requirements = python3,kivy,pyjnius
+requirements =python3==3.10.11,hostpython3==3.10.11,kivy,pyjnius
 
 orientation = portrait
 fullscreen = 0
