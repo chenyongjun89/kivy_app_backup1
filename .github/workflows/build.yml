@@ -1,23 +1,39 @@
 name: Build Kivy APK
-
 on: [push, workflow_dispatch]
 
 jobs:
   build:
-    runs-on: ubuntu-latest
-    container:
-      image: kivy/buildozer:latest
-
+    runs-on: ubuntu-22.04
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Build with Buildozer
-      env:
-        # 环境变量：明确告诉它不要检查 root
-        BUILDOZER_WARN_ON_ROOT: 0
-      # 使用 yes | 自动回答可能出现的任何 y/n 提示
-      run: yes | buildozer android debug
+    - name: Clean Cache
+      run: rm -rf .buildozer
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev aidl
+        pip install buildozer cython
+        pip install "pyjnius>=1.4.0"
+
+    - name: Create Swap Space
+      run: |
+        sudo swapoff -a || true
+        sudo rm -f /swapfile
+        sudo fallocate -l 4G /swapfile || sudo dd if=/dev/zero of=/swapfile bs=1M count=4096
+        sudo chmod 600 /swapfile
+        sudo mkswap /swapfile
+        sudo swapon /swapfile
+
+    - name: Build APK
+      run: echo y | buildozer android debug
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
